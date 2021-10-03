@@ -2,17 +2,21 @@ package QtJavaTcpTest.Jsource;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
-public class Server extends ThreadManager {
-
+public class Server {
+	Socket clientSocket = null;
 	ServerSocket serverSocket = null;
-	private final int port = 5555;
+	private static final int port = 5555;
+	private static final int MAX_THREAD_POOL_SIZE = 25;
+	private static ExecutorService threadPool = Executors.newWorkStealingPool(MAX_THREAD_POOL_SIZE);
 	
 	public Server() {
 		System.out.println("running server....");
-		
 	}
 	
 	public void run() {
@@ -36,21 +40,16 @@ public class Server extends ThreadManager {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			SimplyTcpSocket socketThread = null;
+	
 			try {
-				socketThread  = new SimplyTcpSocket(clientSocket);
-				add(socketThread);
-				socketThread.run();
-				remove(socketThread);
-				socketThread = null;
+				threadPool.submit(new SimplyTcpSocket(clientSocket));
+
 				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			finally {
-				if(socketThread != null) {
-					remove(socketThread);
-				}
+
 				System.gc();
 				
 			}
@@ -59,9 +58,6 @@ public class Server extends ThreadManager {
 		
 	}
 	
-	public void remove(Runnable thread) {
-		super.remove(thread);
-	}
 	
 	public static void main(String[] args) {
 		Server s = new Server();
