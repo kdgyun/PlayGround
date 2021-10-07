@@ -4,6 +4,7 @@
 
 TcpSocketForm *s;
 bool run();
+bool syntax(QString str);
 int main() {
 
 	bool t = run();
@@ -22,22 +23,22 @@ bool run() {
 	qDebug() << s->socket->state() << '\n';
 	try {
 		while (!(s->socket->state() == 0)) {
-			std::cout << "input value or closed\n";
+			std::cout << "input two values or \"closed\"\n";
 			std::string str;
 			getline(std::cin, str);
 
 			QString ss = QString::fromStdString(str);
-
+			if(!syntax(ss)) {
+				qDebug() << "syntax error";
+				continue;
+			}
 			s->sendLine(ss);
 			s->socket->flush();
-			QString re = s->readLine();
-			re.remove('\n');
-			re.remove('\r');
-			qDebug() << "read msg : >> " << re;
+			QString re = s->readLine().remove('\n').remove('\r');
 
 			if(re == "closed") {
-				return true;
 				delete s;
+				return true;
 			}
 			qDebug() << "result value is " << re.toInt();
 		}
@@ -49,4 +50,17 @@ bool run() {
 	}
 	delete s;
 	return false;
+}
+bool syntax(QString str) {
+	if(!str.compare("closed")) {
+		return true;
+	}
+	bool ok1, ok2;
+	QStringList list = str.split(' ');
+	if(list.size() != 2) {
+		return false;
+	}
+	list.at(0).toInt(&ok1, 10);
+	list.at(1).toInt(&ok2, 10);
+	return ok1 && ok2;
 }

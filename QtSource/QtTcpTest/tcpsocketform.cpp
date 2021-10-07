@@ -4,6 +4,7 @@ TcpSocketForm::TcpSocketForm()
 {
 
 	socket = new QTcpSocket();
+
 	flag = connectToHost("127.0.0.1");
 	if(!flag) {
 		qDebug() << "connected failed\n";
@@ -13,6 +14,7 @@ TcpSocketForm::TcpSocketForm()
 }
 
 TcpSocketForm::~TcpSocketForm() {
+	qDebug() << "call running destructor";
 	delete this->socket;
 }
 
